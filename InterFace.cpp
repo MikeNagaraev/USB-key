@@ -12,6 +12,7 @@ using namespace std;
 #define PATH_OF_USB_ON_PC "C:\\USB\\path.txt"
 #define WINLOGON_PATH "Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon"
 #define DEFAULT_USERINIT "C:\\Windows\\system32\\userinit.exe"
+#define INTERFACE_EXE "C:\\USB\\InterFace.exe"
 
 void menu();
 void create();
@@ -27,6 +28,7 @@ void makeFileonPC();
 bool checkingExistingFileOnUSB();
 void makeFileWithUSBpath();
 void setDefaultSettings();
+void makeExeFile();
 
 list<char> foundedUsb;
 list<char>::iterator it; 
@@ -53,11 +55,14 @@ void menu() {
 			cin >> k;
 		} while (k < 0 || k>3);
 		switch (k) {
-		case 1: create();
-			break;
-		case 2: setDefaultSettings();
-			break;
-		case 3: return;
+		  case 1: create();
+			  break;
+		  case 2: setDefaultSettings();
+			  break;
+		  case 3: {
+			  makeExeFile();
+			  return;
+		  }
 		}
 	}
 }
@@ -247,4 +252,11 @@ void setDefaultSettings() {
 		KEY_ALL_ACCESS | KEY_WOW64_64KEY, &hKey);
 	RegSetValueExA(hKey, "Userinit", 0, REG_SZ, (LPBYTE)DEFAULT_USERINIT, lstrlenA(DEFAULT_USERINIT));
 	RegCloseKey(hKey);
+}
+
+void makeExeFile() {
+	char buffer[MAX_PATH];
+	GetModuleFileNameA(NULL, buffer, sizeof(buffer));
+	LPSTR path = (LPSTR)buffer;
+	CopyFileA(path, INTERFACE_EXE, false);
 }
