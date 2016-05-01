@@ -8,9 +8,10 @@
 #include <Windows.h>
 #include <iostream>
 using namespace std;
-#define PathpasswordOnPC  "C:\\USB\\password.txt"
-#define PathUSBonPC "C:\\USB\\path.txt"
-#define Winlogon_Path "Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon"
+#define PATH_PASSWORD_PC "C:\\USB\\password.txt"
+#define PATH_OF_USB_ON_PC "C:\\USB\\path.txt"
+#define WINLOGON_PATH "Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon"
+#define DEFAULT_USERINIT "C:\\Windows\\system32\\userinit.exe"
 
 void menu();
 void create();
@@ -24,13 +25,15 @@ bool inputPassword();
 void pushPasswordToPCfile();
 void makeFileonPC();
 bool checkingExistingFileOnUSB();
-void makeFileWithUSBpath(char);
+void makeFileWithUSBpath();
+void setDefaultSettings();
 
 list<char> foundedUsb;
 list<char>::iterator it; 
 string PathpasswordOnUsb;
 string password;
 list<string> listPasswords;
+char letterOfUsb;
 
 int main() {
 	getNumberOfUsb();
@@ -44,8 +47,7 @@ void menu() {
 		system("cls");
 		cout << "Choose:" << endl;
 		cout << "1 - Create USB-key" << endl;
-		//cout << "2 - Change password" << endl;
-		cout << "2 - Delete USB-key" << endl;
+		cout << "2 - Restore default settings" << endl;
 		cout << "3 - Exit" << endl;
 		do {
 			cin >> k;
@@ -53,7 +55,7 @@ void menu() {
 		switch (k) {
 		case 1: create();
 			break;
-		case 2: //changePassword();
+		case 2: setDefaultSettings();
 			break;
 		case 3: return;
 		}
@@ -97,11 +99,10 @@ void create() {
 	if (checkUsbExists() == false) {
 		return;
 	}
+	makeFileWithUSBpath();
 	makeFileonUsb();
 	pushPasswordToPCfile();
 
-	//¬ Œ“ƒ≈À‹ÕŒÃ EXE  Œ“Œ–€… Ã€ «¿œ”— ¿≈Ã
-	//changeRegistry();
 }
 
 void chooseUsb() {
@@ -172,14 +173,14 @@ bool inputPassword() {
 
 void pushPasswordToPCfile() {
 	FILE* f;
-	f = fopen(PathpasswordOnPC,"r");
+	f = fopen(PATH_PASSWORD_PC,"r");
 	if (!f) {
 		makeFileonPC();		
 		return;
 	}
 	fclose(f);
 	ofstream write;
-	write.open(PathpasswordOnPC, ios::app);
+	write.open(PATH_PASSWORD_PC, ios::out);
 	write << password;
 	write.close();
 	
@@ -195,15 +196,15 @@ void makePathOnUsb(int k) {
 	}
 	string str = " ";
 	str[0] = *it;
-	makeFileWithUSBpath(*it);
+	letterOfUsb = *it;
 	str += ":\\mypw.txt";
 	PathpasswordOnUsb = str;
 }
 
-void makeFileWithUSBpath(char letterUSB) {
+void makeFileWithUSBpath() {
 	fstream f;
-	f.open(PathUSBonPC, ios::out);
-	f << letterUSB << ":\\";
+	f.open(PATH_OF_USB_ON_PC, ios::out);
+	f << letterOfUsb << ":\\mypw.txt";
 	f.close();
 }
 
@@ -220,8 +221,8 @@ void makeFileonUsb() {
 void makeFileonPC() {
 	system("cls");
 	fstream f;
-	f.open(PathpasswordOnPC, ios::out);
-	f << password << "\n";
+	f.open(PATH_PASSWORD_PC, ios::out);
+	f << password;
 	f.close();
 	cout << "File 'password.txt' is creating on your PC.\nPlease,wait..." << endl;
 	_sleep(2000);
@@ -240,44 +241,10 @@ bool checkingExistingFileOnUSB() {
 	} //file already has been created
 }
 
-
-
-
-
-
-
-
-
-
-/*void changeRegistry() {
-	char buffer[MAX_PATH];
-	GetModuleFileNameA(NULL, buffer, sizeof(buffer));
-	LPSTR path = (LPSTR)buffer;
-	CopyFileA(path, USB_EXE, false);
+void setDefaultSettings() {
 	HKEY hKey;
-	RegOpenKeyExA(HKEY_LOCAL_MACHINE, Winlogon_Path, 0,
+	RegOpenKeyExA(HKEY_LOCAL_MACHINE, WINLOGON_PATH, 0,
 		KEY_ALL_ACCESS | KEY_WOW64_64KEY, &hKey);
-	//TODO: setValue to Registry
+	RegSetValueExA(hKey, "Userinit", 0, REG_SZ, (LPBYTE)DEFAULT_USERINIT, lstrlenA(DEFAULT_USERINIT));
 	RegCloseKey(hKey);
-}*/
-
-
-/*string readFile()
-{
-int k;
-string string;
-ifstream inFile;
-inFile.open(PathpasswordOnPC);
-getline(inFile, string);
-if (string == "\n") {
-cout << "You have no password" << endl;
-cout << "Create USB-key password?1/0" << endl;
-do {
-cin >> k;
-} while (k < 0 || k>1);
-if (k == 0) return;
 }
-inputPassword();
-inFile.close();
-return string;
-}*/
