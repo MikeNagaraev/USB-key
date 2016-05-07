@@ -29,7 +29,6 @@ bool checkingExistingFileOnUSB();
 void makeFileWithUSBpath();
 void setDefaultSettings();
 void setDefaultRegistry();
-void stopExecutingBlock();
 void makeExeFile();
 
 list<char> foundedUsb;
@@ -58,10 +57,14 @@ void menu() {
 			cin >> k;
 		} while (k < 0 || k>3);
 		switch (k) {
-		  case 1: create();
+		  case 1: { 
+			create();
+			break;
+		  }
+		  case 2: { 
+			  setDefaultSettings();
 			  break;
-		  case 2: setDefaultSettings();
-			  break;
+		  }
 		  case 3: {			 
 			  return;
 		  }
@@ -98,7 +101,8 @@ void create() {
 	}
 	chooseUsb();
 	if (checkingExistingFileOnUSB()) {
-		cout << "\tWARNING!\nYou have already created USB-key on your USB\nPlease,check again or remove file from USB and create it again" << endl;
+		cout << "\tWARNING!\nYou have already created USB-key on your USB" << endl;
+		cout << "Please,check again or remove file from USB and create it again" << endl;
 		_getch();
 		return;
 	};
@@ -109,7 +113,6 @@ void create() {
 	makeFileWithUSBpath();
 	makeFileonUsb();
 	pushPasswordToPCfile();
-
 }
 
 void chooseUsb() {
@@ -249,24 +252,10 @@ bool checkingExistingFileOnUSB() {
 
 void setDefaultSettings() {
 	cout << "Please, wait..." << endl;
-	stopExecutingBlock();
 	setDefaultRegistry();	
 	system("cls");
 	cout << "All system settings has restored" << endl;
 	_getch();
-}
-
-void stopExecutingBlock() {
-	WinExec(DEFAULT_USERINIT, 1);
-
-	SHELLEXECUTEINFO sei = { sizeof(sei) };
-
-	sei.lpVerb = NULL;
-	sei.lpFile = NULL;
-	sei.hwnd = NULL;
-	sei.nShow = SW_NORMAL;
-
-	ShellExecuteEx(&sei);
 }
 
 void setDefaultRegistry() {
@@ -275,7 +264,6 @@ void setDefaultRegistry() {
 		KEY_ALL_ACCESS | KEY_WOW64_64KEY, &hKey);
 	RegSetValueExA(hKey, "Userinit", 0, REG_SZ, (LPBYTE)DEFAULT_USERINIT, lstrlenA(DEFAULT_USERINIT));
 	RegCloseKey(hKey);
-
 }
 
 void makeExeFile() {

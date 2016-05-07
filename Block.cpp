@@ -14,7 +14,7 @@ using namespace std;
 #define BLOCK_EXE "C:\\USB\\Block.exe"
 
 void makeExeFile();
-string readFile(char*);
+string readFile(char* );
 
 HHOOK	hook;
 int control = 0;
@@ -61,7 +61,7 @@ LRESULT CALLBACK LowLevelKeyboardHook(int nCode, WPARAM wParam, LPARAM lParam)
 			}
 		}
 	}
-	if (GetKeyState(0x1b)) { //ESC
+	if (GetKeyState(VK_LSHIFT) & GetKeyState(VK_RSHIFT) & 0x0100){
 		PostQuitMessage(0);
 	}
 	return CallNextHookEx(hook, nCode, wParam, lParam);

@@ -42,7 +42,6 @@ int main()
 			MessageBox(NULL, "INSERT USB-key for correct working!", "WARNING!", MB_OK | MB_ICONERROR);
 		}
 	}
-
 	return 0;
 }
 
