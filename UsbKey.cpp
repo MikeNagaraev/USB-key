@@ -38,6 +38,9 @@ int main()
 			open();
 			break;
 		}
+		else {
+			MessageBox(NULL, "INSERT USB-key for correct working!", "WARNING!", MB_OK | MB_ICONERROR);
+		}
 	}
 
 	return 0;
@@ -76,14 +79,8 @@ void open()
 
 	sei.lpVerb = "runas";
 	sei.lpFile = BLOCK_EXE;
-	sei.hwnd = NULL;
+	sei.hwnd = NULL; 
 	sei.nShow = SW_NORMAL;
 
 	ShellExecuteEx(&sei);
 }
-
-
-
-
-
-

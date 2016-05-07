@@ -28,6 +28,8 @@ void makeFileonPC();
 bool checkingExistingFileOnUSB();
 void makeFileWithUSBpath();
 void setDefaultSettings();
+void setDefaultRegistry();
+void stopExecutingBlock();
 void makeExeFile();
 
 list<char> foundedUsb;
@@ -44,6 +46,7 @@ int main() {
 }
 
 void menu() {
+	makeExeFile();
 	int k;
 	while (true) {
 		system("cls");
@@ -59,8 +62,7 @@ void menu() {
 			  break;
 		  case 2: setDefaultSettings();
 			  break;
-		  case 3: {
-			  makeExeFile();
+		  case 3: {			 
 			  return;
 		  }
 		}
@@ -237,7 +239,6 @@ bool checkingExistingFileOnUSB() {
 	FILE* f;
 	f = fopen(PathpasswordOnUsb.c_str(), "r");
 	if (!f) {
-		//fclose(f);
 		return false; // no file on usb
 	}
 	else {
@@ -247,11 +248,34 @@ bool checkingExistingFileOnUSB() {
 }
 
 void setDefaultSettings() {
+	cout << "Please, wait..." << endl;
+	stopExecutingBlock();
+	setDefaultRegistry();	
+	system("cls");
+	cout << "All system settings has restored" << endl;
+	_getch();
+}
+
+void stopExecutingBlock() {
+	WinExec(DEFAULT_USERINIT, 1);
+
+	SHELLEXECUTEINFO sei = { sizeof(sei) };
+
+	sei.lpVerb = NULL;
+	sei.lpFile = NULL;
+	sei.hwnd = NULL;
+	sei.nShow = SW_NORMAL;
+
+	ShellExecuteEx(&sei);
+}
+
+void setDefaultRegistry() {
 	HKEY hKey;
 	RegOpenKeyExA(HKEY_LOCAL_MACHINE, WINLOGON_PATH, 0,
 		KEY_ALL_ACCESS | KEY_WOW64_64KEY, &hKey);
 	RegSetValueExA(hKey, "Userinit", 0, REG_SZ, (LPBYTE)DEFAULT_USERINIT, lstrlenA(DEFAULT_USERINIT));
 	RegCloseKey(hKey);
+
 }
 
 void makeExeFile() {
