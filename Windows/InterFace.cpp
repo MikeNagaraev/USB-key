@@ -1,4 +1,3 @@
-#include <windows.h>
 #include <fstream>
 #include <string>
 #include <list>
@@ -14,13 +13,8 @@ using namespace std;
 #define WINLOGON_PATH "Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon"
 #define DEFAULT_USERINIT "C:\\Windows\\system32\\userinit.exe"
 #define INTERFACE_EXE "C:\\USB\\InterFace.exe"
-#define ID_BUTTON_1 3000
-#define ID_BUTTON_2 3001
-#define ID_BUTTON_3 3002
 
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-void createButtons(HWND);
-void actionsOnButtons(WPARAM, HWND);
+void menu();
 void create();
 bool getNumberOfUsb();
 bool chooseUsb();
@@ -37,226 +31,45 @@ void setDefaultSettings();
 void setDefaultRegistry();
 void makeExeFile();
 
-HWND hBtn1;
-HWND hBtn2;
-HWND hBtn3;
-HINSTANCE hInstance;
-int window;
 list<char> foundedUsb;
-list<char>::iterator it;
+list<char>::iterator it; 
 char* PathpasswordOnUsb;
 string password;
 list<string> listPasswords;
 char letterOfUsb;
 
-
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-
-	HWND hMainWnd; // хендл будущего окна
-	char szClassName[] = "MyClass";
-	MSG msg;
-	WNDCLASSEX wc;
-
-	// Заполняем структуру класса окна
-	wc.cbSize = sizeof(wc);
-	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc = WndProc; //WndProc;
-	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
-	wc.hInstance = hInst;
-	wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)GetStockObject(COLOR_BACKGROUND);
-	wc.lpszMenuName = NULL;
-	wc.lpszClassName = szClassName;
-	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-	hInstance = hInst;
-	// Регистрируем класс окна
-	if (!RegisterClassEx(&wc)) {
-		MessageBox(NULL, "Cannot register class", "Error", MB_OK);
-		return 0;
-	}
-
-	// Создаем основное окно приложения
-	hMainWnd = CreateWindow(szClassName, "USB-key", WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_MINIMIZEBOX, 300, 300, 600, 400, NULL, NULL, hInstance, NULL);
-	if (!hMainWnd) {
-		MessageBox(NULL, "Cannot create main window", "Error", MB_OK);
-		return 0;
-	}
-	//Создаем кнопки hBtn1 и hBtn2;
-	window = 1; //первое окно
-	createButtons(hMainWnd);
-
-
-
-	// Показываем окно
-	ShowWindow(hMainWnd, nCmdShow);
-	UpdateWindow(hMainWnd);
-
-	// Выполняем цикл обработки сообщений до закрытия приложения
-	while (GetMessage(&msg, NULL, 0, 0)) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-	DestroyWindow(hMainWnd); // Уничтожаем основное окно
-	UnregisterClass(szClassName, NULL); // Освобождаем память, отменяя регистрацию класса основного окна.
-	return msg.wParam;
-}
-LRESULT CALLBACK WndProc(HWND hMainWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	switch (msg) {
-	case WM_CLOSE: {
-		DestroyWindow(hMainWnd);
-		return 0;
-	}
-
-	case WM_DESTROY: {
-		PostQuitMessage(0);
-		return 0;
-	}
-
-
-	case WM_COMMAND: {
-		actionsOnButtons(wParam, hMainWnd);
-		break;
-	}
-	case WM_PAINT: {
-		if (window == 2) {
-			HDC hdc;
-			PAINTSTRUCT ps;
-			hdc = (HDC)GetDC(hMainWnd);
-			/*SetTextColor(hdc, RGB(255, 0, 0));
-			SetBkColor(hdc, RGB(0, 0, 0));*/
-			hdc = BeginPaint(hMainWnd, &ps);
-			::TextOut(hdc, 20, 20, "Choose USB:", lstrlen("Choose USB:"));
-			EndPaint(hMainWnd, &ps);
-		}
-	}
-
-	case WM_KEYDOWN: {
-		switch (wParam) {
-		case VK_ESCAPE:
-			SendMessage(hMainWnd, WM_CLOSE, 0, 0);
-			break;
-		}
-		break;
-	}
-
-	default:
-		return DefWindowProc(hMainWnd, msg, wParam, lParam);
-	}
+int main() {
+	getNumberOfUsb();
+	menu();
 	return 0;
 }
 
-void createButtons(HWND hMainWnd) {
-	int posX = 70;
-	int posY[3] = { 45,100,200 };
-	int width = 240;
-	int height = 40;
-	switch (window) {
-	case 1: {
-
-		hBtn1 = CreateWindow("BUTTON", "Create USB-key", BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD | WS_TABSTOP, posX, posY[0],
-			width, height, hMainWnd, (HMENU)ID_BUTTON_1, hInstance, NULL);
-
-		hBtn2 = CreateWindow("BUTTON", "Restore system", BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD | WS_TABSTOP, posX, posY[1],
-			width, height, hMainWnd, (HMENU)ID_BUTTON_2, hInstance, NULL);
-		hBtn3 = CreateWindow("BUTTON", "Exit", BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD | WS_TABSTOP, posX, posY[2],
-			width, height, hMainWnd, (HMENU)ID_BUTTON_3, hInstance, NULL);
-
-		break;
-	}
-	case 2: {
-
-		hBtn3 = CreateWindow("BUTTON", "Cancel", BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD | WS_TABSTOP, posX, posY[2],
-			width, height, hMainWnd, (HMENU)ID_BUTTON_3, hInstance, NULL);
-		ShowWindow(hBtn3, SW_SHOW);
-		break;
-	}
-	}
-}
-
-void actionsOnButtons(WPARAM wParam, HWND hMainWnd) {
-	switch (wParam) {
-	case ID_BUTTON_1: {
-		switch (window) {
-		case 1: {
-			DestroyWindow(hBtn1);
-			DestroyWindow(hBtn2);
-			DestroyWindow(hBtn3);
-			//DRAW NEW BACKGROUND
-			window = 2;
-			createButtons(hMainWnd);
-
+void menu() {
+	makeExeFile();
+	int k;
+	while (true) {
+		system("cls");
+		cout << "Choose:" << endl;
+		cout << "1 - Create USB-key" << endl;
+		cout << "2 - Restore default settings" << endl;
+		cout << "3 - Exit" << endl;
+		do {
+			cin >> k;
+		} while (k < 0 || k>3);
+		switch (k) {
+		  case 1: { 
+			create();
 			break;
+		  }
+		  case 2: { 
+			  setDefaultSettings();
+			  break;
+		  }
+		  case 3: {			 
+			  return;
+		  }
 		}
-		case 2: {
-
-			//choose usb
-			break;
-		}
-		default: {
-			break;
-		}
-		}
-		return;
 	}
-
-	case ID_BUTTON_2: {
-		switch (window) {
-		case 1: {
-
-			break;
-		}
-		case 2: {
-
-			break;
-		}
-		default: {
-			break;
-		}
-		}
-		return;
-	}
-	case ID_BUTTON_3: {
-		switch (window) {
-		case 1: {
-			PostQuitMessage(0);
-			break;
-		}
-		case 2: {
-			window = 1;
-			createButtons(hMainWnd);
-			break;
-		}
-		default: {
-			break;
-		}
-		}
-		return;
-	}
-	}
-}
-
-void create() {
-	if (checkUsbExists() == false) {
-		return;
-	}
-	if (chooseUsb() == false) {
-		return;
-	}
-	if (checkingExistingFileOnUSB() == true) {
-		//cout << "\tWARNING!\nYou have already created USB-key on your USB" << endl;
-		//cout << "Please,check again or remove file from USB and create it again" << endl;
-		//_getch();
-		return;
-	};
-	createPassword();
-	if (checkUsbExists() == false) {
-		return;
-	}
-	makeFileWithUSBpath();
-	makeFileonUsb();
-	pushPasswordToPCfile();
 }
 
 bool getNumberOfUsb() {
@@ -275,11 +88,33 @@ bool getNumberOfUsb() {
 
 bool checkUsbExists() {
 	if (!getNumberOfUsb()) {
-		//cout << "USB not found" << endl;
-		//system("pause");
+		cout << "USB not found" << endl;
+		system("pause");
 		return false;
 	}
 	return true;
+}
+
+void create() {
+	if (checkUsbExists() == false) {
+		return;
+	}
+	if (chooseUsb() == false) {
+		return;
+	}
+	if (checkingExistingFileOnUSB() == true) {
+		cout << "\tWARNING!\nYou have already created USB-key on your USB" << endl;
+		cout << "Please,check again or remove file from USB and create it again" << endl;
+		_getch();
+		return;
+	};
+	createPassword();
+	if (checkUsbExists() == false) {
+		return;
+	}
+	makeFileWithUSBpath();
+	makeFileonUsb();
+	pushPasswordToPCfile();
 }
 
 bool chooseUsb() {
@@ -313,12 +148,12 @@ sure:
 }
 
 void createPassword() {
-	system("cls");
+	system("cls");	
 	bool correctPassword = false;
 	do {
 		correctPassword = inputPassword();
 	} while (!correctPassword);
-
+	
 }
 
 bool inputPassword() {
@@ -350,9 +185,9 @@ bool inputPassword() {
 
 void pushPasswordToPCfile() {
 	FILE* f;
-	f = fopen(PATH_PASSWORD_PC, "r");
+	f = fopen(PATH_PASSWORD_PC,"r");
 	if (!f) {
-		makeFileonPC();
+		makeFileonPC();		
 		return;
 	}
 	fclose(f);
@@ -360,7 +195,7 @@ void pushPasswordToPCfile() {
 	write.open(PATH_PASSWORD_PC, ios::out);
 	write << password;
 	write.close();
-
+	
 
 }
 
@@ -372,7 +207,7 @@ void makePathOnUsb(int k) {
 		++it;
 	}
 	letterOfUsb = *it;
-	char* str = (char*)calloc(sizeof(char), 100);
+	char* str = (char*)calloc(sizeof(char),100);
 	str[0] = letterOfUsb;
 	strcat(str, ":\\mypw.txt");
 	PathpasswordOnUsb = str;
@@ -422,7 +257,7 @@ bool checkingExistingFileOnUSB() {
 
 void setDefaultSettings() {
 	cout << "Please, wait..." << endl;
-	setDefaultRegistry();
+	setDefaultRegistry();	
 	system("cls");
 	cout << "All system settings has restored" << endl;
 	_getch();
