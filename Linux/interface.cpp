@@ -26,6 +26,7 @@ void create();
 void get_usb_list();
 void show_list_and_choose();
 void copy_usb_to_path_txt();
+void rmfile();
 
 int main() {
   menu();
@@ -63,6 +64,7 @@ void create() {
   show_list_and_choose();
   mkdir();
   copy_usb_to_path_txt();
+  rmfile();
 }
 
 void get_usb_list() {
@@ -74,6 +76,7 @@ void read_file_to_list(string file_path) {
   string string;
   ifstream inFile;
   inFile.open(file_path.c_str());
+  listOfUsb.clear();
   while(!inFile.eof()){
 	getline(inFile, string);
 	if(!inFile.eof()) {
@@ -88,18 +91,22 @@ void show_list_and_choose() {
   while(true) {
 	system("clear");
     cout << "Choose USB: " << endl;
+    while(listOfUsb.size() == 0) {
+      get_usb_list();
+	}
     it = listOfUsb.begin();
     for(int i = 0; i < listOfUsb.size(); i++, ++it) {
 	  cout << i + 1 << ". " << *it << endl;	
     }  
     do {
+		//CREATE THREAD WHICH CHECKS USB
 		cin >> n;
 	} while (n < 1 || n > listOfUsb.size());
 	it = listOfUsb.begin();
     for(int i = 1; i < n; i++) {
 	  ++it;
 	} 
-	global_path = PATH_TO_USBS + *it;
+	global_path = *it;
 	return;
   }
 }
@@ -110,6 +117,10 @@ void mkdir() {
 
 void mkfile() {
 	system("touch /home/mikhail/USB/path.txt"); 
+}
+
+void rmfile() {
+  system("rm /home/mikhail/usblist.txt");
 }
 
 void copy_usb_to_path_txt() {
