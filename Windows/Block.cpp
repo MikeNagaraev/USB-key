@@ -39,11 +39,9 @@ LRESULT CALLBACK LowLevelKeyboardHook(int nCode, WPARAM wParam, LPARAM lParam)
 		if (ks->vkCode == VK_LCONTROL)
 		{
 			control++;
-			cout << control;
 		}
 		else
 		{
-			cout << control;
 			control = 0;
 		}
 		if (control == 3)
