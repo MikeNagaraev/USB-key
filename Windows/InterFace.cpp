@@ -24,12 +24,12 @@ void makeFileonUsb();
 void createPassword();
 bool inputPassword();
 void pushPasswordToPCfile();
-void makeFileonPC();
 bool checkingExistingFileOnUSB();
 void makeFileWithUSBpath();
 void setDefaultSettings();
 void setDefaultRegistry();
 void makeExeFile();
+void warningMessage();
 
 list<char> foundedUsb;
 list<char>::iterator it; 
@@ -103,9 +103,7 @@ void create() {
 		return;
 	}
 	if (checkingExistingFileOnUSB() == true) {
-		cout << "\tWARNING!\nYou have already created USB-key on your USB" << endl;
-		cout << "Please,check again or remove file from USB and create it again" << endl;
-		_getch();
+		warningMessage();
 		return;
 	};
 	createPassword();
@@ -147,6 +145,12 @@ sure:
 	}
 }
 
+void warningMessage() {
+	cout << "\tWARNING!\nYou have already created USB-key on your USB" << endl;
+	cout << "Please,check again or remove file from USB and create it again" << endl;
+	_getch();
+}
+
 void createPassword() {
 	system("cls");	
 	bool correctPassword = false;
@@ -184,17 +188,14 @@ bool inputPassword() {
 }
 
 void pushPasswordToPCfile() {
-	FILE* f;
-	f = fopen(PATH_PASSWORD_PC,"r");
-	if (!f) {
-		makeFileonPC();		
-		return;
-	}
-	fclose(f);
-	ofstream write;
-	write.open(PATH_PASSWORD_PC, ios::out);
-	write << password;
-	write.close();
+	system("cls");
+	fstream f;
+	f.open(PATH_PASSWORD_PC, ios::out);
+	SetFileAttributes(PATH_PASSWORD_PC, FILE_ATTRIBUTE_HIDDEN);
+	f << password;
+	f.close();
+	cout << "File 'password.txt' is creating on your PC.\nPlease,wait..." << endl;
+	_sleep(2000);
 	
 
 }
@@ -232,27 +233,16 @@ void makeFileonUsb() {
 	_sleep(2000);
 }
 
-void makeFileonPC() {
-	system("cls");
-	fstream f;
-	f.open(PATH_PASSWORD_PC, ios::out);
-	SetFileAttributes(PATH_PASSWORD_PC, FILE_ATTRIBUTE_HIDDEN);
-	f << password;
-	f.close();
-	cout << "File 'password.txt' is creating on your PC.\nPlease,wait..." << endl;
-	_sleep(2000);
-}
-
 bool checkingExistingFileOnUSB() {
 	FILE* f;
 	f = fopen(PathpasswordOnUsb, "r");
 	if (!f) {
-		return false; // no file on usb
+		return false; 
 	}
 	else {
 		fclose(f);
 		return true;
-	} //file already has been created
+	} 
 }
 
 void setDefaultSettings() {
