@@ -10,8 +10,8 @@
 using namespace std;
 
 #define CHECKING_FILE "/home/mikhail/USB/path.txt"	
-#define PATH_TO_BLOCK_SCRIPT "/home/mikhail/scripts/block.sh"
-#define PATH_TO_UNBLOCK_SCRIPT "/home/mikhail/scripts/unblock.sh"
+#define PATH_TO_BLOCK_SCRIPT "/home/mikhail/block.sh"
+#define PATH_TO_UNBLOCK_SCRIPT "/home/mikhail/unblock.sh"
 #define USB_LIST_TXT "/home/mikhail/usblist.txt"
 
 
@@ -35,11 +35,11 @@ int main() {
 
 
 void block() {
-	system("/home/mikhail/scripts/block.sh");
+	system(PATH_TO_BLOCK_SCRIPT);
 }
 
 void unblock() {
-	system("/home/mikhail/scripts/unblock.sh");
+	system(PATH_TO_UNBLOCK_SCRIPT);
 }
 
 string readFile(string filePath)
